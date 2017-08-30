@@ -2,7 +2,7 @@ package com.rea.error
 
 import cats.Apply
 import cats.implicits._
-import com.rea.error.ErrorExercises.ErrorOr
+
 
 object ErrorExercises {
 
@@ -35,7 +35,7 @@ object ErrorExercises {
 
   /**
     * Exercise 1: 
-    * 
+    *
     * Implement findAgent.  
     *
     * It should find the agentId in agents, and return it wrapped in an ErrorOr.
@@ -46,13 +46,12 @@ object ErrorExercises {
     */
 
   val agents = Map(
-    1 -> Agent(1 , "Hocking Stuart"), 
+    1 -> Agent(1 , "Hocking Stuart"),
     2 -> Agent(2, "Ellis Jones")
   )
 
-  def findAgent(agentId: AgentId): ErrorOr[Agent] = agents.find(a => a._1 == agentId) match {
-    case Some(agent) => Right(agent._2)
-    case None => Left(AppError(s"agent ${agentId} not found"))
+  def findAgent(agentId: AgentId): ErrorOr[Agent] = {
+    agents.get(agentId) map (Right(_)) getOrElse Left(AppError(s"agent ${agentId} not found"))
   }
 
   /**
@@ -65,7 +64,7 @@ object ErrorExercises {
     *  def map[B](g: A => B): ErrorOr[B]
     */
 
-  def findAgentAnswer(agentId: AgentId) : ErrorOr[String] = findAgent(agentId).map(a =>  s"The agent is ${a.name}")
+  def findAgentAnswer(agentId: AgentId) : ErrorOr[String] = findAgent(agentId) map (a =>  s"The agent is ${a.name}")
 
   /**
     * Exercise 3:
@@ -85,10 +84,10 @@ object ErrorExercises {
     17 -> Property(17, "A dream house from a non existant agent", 0)
   )
 
-  def findProperty(propertyId: PropertyId) : ErrorOr[Property] = properties.find(_._1 == propertyId) match {
-    case Some(prop) => Right(prop._2)
-    case None => Left(AppError(s"property ${propertyId} not found"))
+  def findProperty(propertyId: PropertyId) : ErrorOr[Property] = {
+    properties.get(propertyId) map (Right(_)) getOrElse Left(AppError(s"property ${propertyId} not found"))
   }
+
 
   /**
     * Then we can find the agent from the property id.
@@ -110,9 +109,9 @@ object ErrorExercises {
   /**
     * Exercise 5:
     *
-    * Having obtained them, it would be tiresome to handle each possibly 
-    * failed agent individually. Either succeed with the full Vector[Agent] 
-    * on the right, or fail with an AppError on the left. 
+    * Having obtained them, it would be tiresome to handle each possibly
+    * failed agent individually. Either succeed with the full Vector[Agent]
+    * on the right, or fail with an AppError on the left.
     *
     * HINT: investigate the "sequence" method. This lets us apply the outer action
     * across the whole structure. The signature is something like:
@@ -129,7 +128,7 @@ object ErrorExercises {
     * This time we either want a Vector of agents if they are all successful, or the
     * first error message.
     *
-    * HINT: investigate the "traverse" method. This lets us perform an action on each element of the vector, 
+    * HINT: investigate the "traverse" method. This lets us perform an action on each element of the vector,
     * distributing the action over the whole traversable structure.
     *
     * Where F an action for which Applicative[F] is defined, the signature is something like:
@@ -187,7 +186,7 @@ object ErrorExercises {
     * (A,B,C) => D ---> (F[A], F[B], F[C]) => F[D]
     *              ...
     *
-    * If arguments (ie A, B, C, etc) don't depend on each other, then Applicatives are a weaker and more general 
+    * If arguments (ie A, B, C, etc) don't depend on each other, then Applicatives are a weaker and more general
     * alternative to monads.
     *
     * We can use it here by instantiating Apply[F], and calling applyN for the number of arguments we have.

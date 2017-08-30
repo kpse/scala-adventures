@@ -155,7 +155,7 @@ object ErrorExercises {
     * Let look up a list of agent ids.
     * This time we either want an error if one doesn't exist or a list of the agents' names.
     */
-  def findAllAgentsNames(agentIds: Vector[AgentId]): ErrorOr[Vector[String]] = ???
+  def findAllAgentsNames(agentIds: Vector[AgentId]): ErrorOr[Vector[String]] = agentIds traverseU (findAgent(_) map (_.name))
   /**
     * Exercise 9:
     *

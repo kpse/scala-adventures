@@ -164,7 +164,7 @@ object ErrorExercises {
     * HINT: Consider cats method ".separate", which among other things, can squeeze an F[Xor[A,B]] into an (F[A], F[B]).
     */
 
-  def findSomeAgents(agentIds: Vector[AgentId]): (Vector[AppError], Vector[Agent]) = ???
+  def findSomeAgents(agentIds: Vector[AgentId]): (Vector[AppError], Vector[Agent]) = agentIds map findAgent separate
 
   /**
     * Exercise 10:
@@ -174,7 +174,10 @@ object ErrorExercises {
     *
     * HINT: use a for comprehension.
     */
-  def suggestAProperty(propertyId: PropertyId, agentId: AgentId): ErrorOr[String] = ???
+  def suggestAProperty(propertyId: PropertyId, agentId: AgentId): ErrorOr[String] = for {
+    property <- findProperty(propertyId)
+    agent <- findAgent(agentId)
+  } yield s"Hey ${agent.name} how about selling ${property.description}"
 
   /**
     * Exercise 11:
@@ -194,13 +197,16 @@ object ErrorExercises {
     * ie
     * def makeSandwich(b: Bacon, l: Lettuce, t: Tomato): Sandwich = ...
     *
-    * val optionalSandwich: Option[Sandwich] = 
+    * val optionalSandwich: Option[Sandwich] =
     *   Apply[Option].map3(optionalBacon, optionalLettuce, optionalTomato)(makeSandwich)
     *
     * Try rewriting the suggestAProperty method above using an Apply[ErrorOr].mapXXX variant.
     */
 
-  def suggestAProperty2(propertyId: PropertyId, agentId: AgentId): ErrorOr[String] = ???
+  def suggestAProperty2(propertyId: PropertyId, agentId: AgentId): ErrorOr[String] =
+    Apply[ErrorOr].map2(findProperty(propertyId), findAgent(agentId)) { (property, agent) =>
+      s"Hey ${agent.name} how about selling ${property.description}"
+    }
 
 
 }

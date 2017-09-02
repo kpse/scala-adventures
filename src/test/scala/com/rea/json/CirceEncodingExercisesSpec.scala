@@ -41,7 +41,7 @@ class CirceEncodingExercisesSpec extends Specification with JsonMatchers {
       }
       "encode an Agent object with agent id" in {
         val agent = Agent("Jones", List("james", "henry"), true, Some("FXDNI"))
-        writeAgent3(agent) must beEqualTo("""{"surname":"Jones","firstNames":["james","henry"],"principal":true,"agentid":"FXDNI"}""")
+        writeAgent3(agent) must beEqualTo("""{"surname":"Jones","firstNames":["james","henry"],"principal":true,"agentId":"FXDNI"}""")
       }
     }
 
@@ -52,7 +52,7 @@ class CirceEncodingExercisesSpec extends Specification with JsonMatchers {
       }
       "encode an Agent object with agent id" in {
         val agent = Agent("Jones", List("james", "henry"), true, Some("FXDNI"))
-        writeAgent5(agent) must beEqualTo("""{"surname":"Jones","firstNames":["james","henry"],"principal":true,"agentid":"FXDNI"}""")
+        writeAgent5(agent) must beEqualTo("""{"surname":"Jones","firstNames":["james","henry"],"principal":true,"agentId":"FXDNI"}""")
       }
     }
 

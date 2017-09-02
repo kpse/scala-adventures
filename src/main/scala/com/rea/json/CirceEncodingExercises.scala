@@ -20,19 +20,21 @@ object CirceEncodingExercises {
     *
     */
 
-  def writeJsonString(value: String): String = ???
+  def writeJsonString(value: String): String = Json.fromString(value).toString()
 
   /** Exercise 2
     * Encode a simple boolean  Hint: use Json.fromBoolean method.
     */
-  def writeJsonBoolean(value: Boolean): String = ???
+  def writeJsonBoolean(value: Boolean): String = Json.fromBoolean(value).toString
 
   /** Exercise 3
     * Encode an array of strings
     * This time use the Json.fromValues method, which takes a Iterable[Json]  (a List[_] is an Iterable[_]!)
     * Hint: use the methods explored above to convert the List[String] to List[Json].
     */
-  def writeJsonArray(values: List[String]): String = ???
+  def writeJsonArray(values: List[String]): String = {
+    Json.fromValues(values map Json.fromString).noSpaces
+  }
 
   /** Exercise 4
     * Encode our first object
@@ -42,7 +44,10 @@ object CirceEncodingExercises {
     */
   case class Agent(surname: String, firstNames: List[String], principal: Boolean, agentId: Option[String] = None)
 
-  def writeAgent(agent: Agent): String = ???
+  def writeAgent(agent: Agent): String = Json.obj(
+    ("surname", Json.fromString(agent.surname)),
+    ("firstNames", Json.fromValues(agent.firstNames map Json.fromString)),
+    ("principal", Json.fromBoolean(agent.principal))).noSpaces
 
   /** Introducing Encoders
     * This is getting a bit tedious.  Wouldn't it be nice if it could work out how to encode the field
@@ -51,17 +56,23 @@ object CirceEncodingExercises {
     * Circe provides us the asJson method on any class A for which there is an Encoder[A] in implicit scope.
     * Gosh ... that was a mouthful!
     * In plain english "If it knows how to encode the type, it will put an asJson method on the type.  We tell it how to
-    *    encode the type by providing an Encoder"
+    * encode the type by providing an Encoder"
     * Functional foo: If you want to understand the mechanics of how this works, it is using the "typeclass" pattern ...
     * Luckily for us, Circe already provides Encoder instances for lots of types (have a look in it's Encoder object)
     *  e.g.
     */
-  val myField = "myField" -> "some string".asJson  // use your IDE to explore implicit parameters in this method call.
+  val myField = "myField" -> "some string".asJson // use your IDE to explore implicit parameters in this method call.
 
   /** Exercise 5
     * Rewrite agent encoding using the Encoder style
     */
-  def writeAgent2(agent: Agent): String = ???
+  def writeAgent2(agent: Agent): String = {
+    implicit val encoder: Encoder[Agent] = (a: Agent) => Json.obj(
+      ("surname", Json.fromString(agent.surname)),
+      ("firstNames", Json.fromValues(agent.firstNames map Json.fromString)),
+      ("principal", Json.fromBoolean(agent.principal)))
+    agent.asJson.noSpaces
+  }
 
   /**
     * But I have a field that is an Option ... I only want to write it if it exists!
@@ -85,18 +96,20 @@ object CirceEncodingExercises {
       "principal" -> agent.principal.asJson
     )
 
-    val optionalFields: List[(String, Json)] = ???
+    val optionalFields: List[(String, Json)] = List(
+      "agentId" -> agent.agentId.asJson
+    )
 
-    Json.obj( ??? ).noSpaces
+    val maybeTuples: Option[List[(String, Json)]] = agent.agentId.map(_ => optionalFields)
+    Json.obj( maybeTuples.map(_ => mandatoryFields ++ optionalFields).getOrElse(mandatoryFields) :_*).noSpaces
 
   }
-
 
 
   /**
     * Option 2
     * Use a custom Printer, in place of no spaces to strip out optional values when you are converting from Json to a string
-    *  val printer = Printer.noSpaces.copy(dropNullKeys = true)
+    * val printer = Printer.noSpaces.copy(dropNullKeys = true)
     *
     *
     * Exercise 8
@@ -108,7 +121,15 @@ object CirceEncodingExercises {
 
   val printer = Printer.noSpaces.copy(dropNullKeys = true)
 
-  def writeAgent5(agent: Agent): String = ???
+  def writeAgent5(agent: Agent): String = {
+    implicit val encoder: Encoder[Agent] = (a: Agent) => Json.obj(
+      "surname" -> agent.surname.asJson,
+      "firstNames" -> agent.firstNames.asJson,
+      "principal" -> agent.principal.asJson,
+      "agentId" -> agent.agentId.asJson
+    )
+    agent.asJson.pretty(printer)
+  }
 
 
   /**
@@ -129,7 +150,6 @@ object CirceEncodingExercises {
     * Write out an encoder that just uses the syntax from Exercise 5,
     * and a simple encode Agent method.
     */
-
 
 
   def writeProperty(property: Property): String = {

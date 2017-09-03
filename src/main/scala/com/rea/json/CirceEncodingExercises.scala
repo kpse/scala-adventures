@@ -1,7 +1,8 @@
 package com.rea.json
 
-import io.circe.{Printer, Encoder, Json}
+import io.circe.{Encoder, Json, Printer}
 import io.circe.syntax._
+import sun.management.resources.agent
 
 
 object CirceEncodingExercises {
@@ -68,9 +69,9 @@ object CirceEncodingExercises {
     */
   def writeAgent2(agent: Agent): String = {
     implicit val encoder: Encoder[Agent] = (a: Agent) => Json.obj(
-      ("surname", Json.fromString(agent.surname)),
-      ("firstNames", Json.fromValues(agent.firstNames map Json.fromString)),
-      ("principal", Json.fromBoolean(agent.principal)))
+      ("surname", Json.fromString(a.surname)),
+      ("firstNames", Json.fromValues(a.firstNames map Json.fromString)),
+      ("principal", Json.fromBoolean(a.principal)))
     agent.asJson.noSpaces
   }
 
@@ -123,10 +124,10 @@ object CirceEncodingExercises {
 
   def writeAgent5(agent: Agent): String = {
     implicit val encoder: Encoder[Agent] = (a: Agent) => Json.obj(
-      "surname" -> agent.surname.asJson,
-      "firstNames" -> agent.firstNames.asJson,
-      "principal" -> agent.principal.asJson,
-      "agentId" -> agent.agentId.asJson
+      "surname" -> a.surname.asJson,
+      "firstNames" -> a.firstNames.asJson,
+      "principal" -> a.principal.asJson,
+      "agentId" -> a.agentId.asJson
     )
     agent.asJson.pretty(printer)
   }
@@ -153,11 +154,17 @@ object CirceEncodingExercises {
 
 
   def writeProperty(property: Property): String = {
-    def encodeAgent(agent: Agent): Json = ???
+    def encodeAgent(agent: Agent): Json = {
+      implicit val encoder: Encoder[Agent] = (a: Agent) => Json.obj(
+        ("surname", Json.fromString(a.surname)),
+        ("firstNames", Json.fromValues(a.firstNames map Json.fromString)),
+        ("principal", Json.fromBoolean(a.principal)))
+      agent.asJson
+    }
 
     Json.obj(
       "description" -> property.description.asJson,
-      "agent" -> ???
+      "agent" -> encodeAgent(property.agent)
     ).noSpaces
   }
 
@@ -184,20 +191,28 @@ object CirceEncodingExercises {
     */
 
   def writePropertyWithEncoder(property: Property): String = {
-    def encodeAgent(agent: Agent): Json = ???
+    def encodeAgent(agent: Agent): Json = {
+      implicit val encoder: Encoder[Agent] = (a: Agent) => Json.obj(
+        ("surname", Json.fromString(a.surname)),
+        ("firstNames", Json.fromValues(a.firstNames map Json.fromString)),
+        ("principal", Json.fromBoolean(a.principal)))
+      agent.asJson(encoder)
+    }
 
     /**
       * Note: since scala 2.11, a Single Abstract Method trait instance can be automatically created from a function
       * that matches the abstract method's signature.  So the below line can be further simplified to:
       * implicit def AgentEncoder: Encoder[Agent] = encodeAgent
       */
-    implicit def AgentEncoder: Encoder[Agent] = ???
+    implicit def AgentEncoder: Encoder[Agent] = (a: Agent) => Json.obj(
+      ("surname", Json.fromString(a.surname)),
+      ("firstNames", Json.fromValues(a.firstNames map Json.fromString)),
+      ("principal", Json.fromBoolean(a.principal)))
 
     Json.obj(
       "description" -> property.description.asJson,
-      "agent" -> ???
+      "agent" -> property.agent.asJson
     ).noSpaces
-    ???
   }
 
 
